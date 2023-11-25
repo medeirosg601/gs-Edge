@@ -1,0 +1,43 @@
+#include <WiFi.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
+
+#define BUZZER_PIN 2 // Pino ao qual o buzzer está conectado
+
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org");
+
+void setup() {
+  Serial.begin(9600);
+  Serial.print("Conectando-se ao Wi-Fi");
+  WiFi.begin("Wokwi-GUEST", "", 6);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(100);
+    Serial.print(".");
+  }
+  Serial.println(" Conectado!");
+  timeClient.begin();
+}
+
+void loop() {
+  timeClient.update();
+  
+  int horaAtual = timeClient.getHours();
+  int minutoAtual = timeClient.getMinutes();
+  
+  // Definindo o horário para acionar o buzzer (exemplo: 8h da manhã)
+  int horaAcionarBuzzer = 8;
+  int minutoAcionarBuzzer = 0;
+  
+  if (horaAtual == horaAcionarBuzzer && minutoAtual == minutoAcionarBuzzer) {
+    acionarBuzzer(); // Chama a função para ativar o buzzer
+    delay(60000); // Evita múltiplos acionamentos no mesmo minuto
+  }
+}
+
+void acionarBuzzer() {
+  tone(BUZZER_PIN, 1000); // Ativa o buzzer com frequência de 1000 Hz
+  delay(2000); // Mantém o buzzer ativo por 2 segundos
+  noTone(BUZZER_PIN); // Desativa o buzzer
+}
